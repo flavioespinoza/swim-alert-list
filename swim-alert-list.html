@@ -1,0 +1,137 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<script src="../d3/d3.min.js"></script>
+
+<!--
+`swim-alert-list`
+Animated list for actionable alerts.
+
+@demo bower_components/swim-alert-list/demo/swim-alert-list_demo.html
+-->
+
+<dom-module id="swim-alert-list">
+  <template>
+    <style>
+
+      :host {
+        display: block;
+      }
+
+      rect.rect-bar {
+        fill: steelblue;
+      }
+
+      text.rect-text {
+        fill: white;
+      }
+
+      .axis path, .axis line {
+        fill: none;
+        stroke: black;
+        shape-rendering: crispEdges;
+      }
+
+    </style>
+
+    <svg id="svg"></svg>
+
+    <paper-button raised on-click="sortList">Sort list</paper-button>
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'swim-alert-list',
+
+      sort: false,
+
+      //TODO: Figure this out
+      xAxis: false,
+
+      createList: function () {
+        const _self = this;
+
+        let margin = {top: 0, right: 10, bottom: 20, left: 10},
+          width = 560 - margin.left - margin.right,
+          height = 500 - margin.top - margin.bottom;
+
+        _self.index = d3.range(24);
+
+        _self.data = _self.index.map(d3.random.normal(100, 10));
+
+        _self.x = d3.scale.linear()
+          .domain([0, d3.max(_self.data)])
+          .range([0, width]);
+
+        _self.y = d3.scale.ordinal()
+          .domain(_self.index)
+          .rangeRoundBands([0, height], .1);
+
+        _self.svg = d3.select(_self.$.svg)
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        _self.bar = _self.svg.selectAll(".bar")
+          .data(_self.data)
+          .enter().append("g")
+          .attr("class", "bar")
+          .attr("transform", function(d, i) { return "translate(0," + _self.y(i) + ")"; });
+
+        _self.bar.append("rect")
+          .attr("class", "rect-bar swim-alert-list")
+          .attr("height", _self.y.rangeBand())
+          .attr("width", _self.x);
+
+        _self.bar.append("text")
+          .attr("class", "rect-text swim-alert-list")
+          .attr("text-anchor", "end")
+          .attr("x", function(d) { return _self.x(d) - 6; })
+          .attr("y", _self.y.rangeBand() / 2)
+          .attr("dy", ".35em")
+          .text(function(d, i) { return i; });
+
+        if (_self.xAxis) {
+          _self.svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.svg.axis()
+              .scale(_self.x)
+              .orient("bottom"));
+        }
+
+      },
+
+      sortList: function () {
+
+        const _self = this;
+
+        if (_self.sort = !_self.sort) {
+          _self.index.sort(function(a, b) { return _self.data[a] - _self.data[b]; });
+        } else {
+          _self.index = d3.range(24);
+        }
+
+        _self.y.domain(_self.index);
+
+        _self.bar.transition()
+          .duration(750)
+          .delay(function(d, i) { return i * 50; })
+          .attr("transform", function(d, i) { return "translate(0," + _self.y(i) + ")"; });
+      },
+
+      ready: function () {
+        const _self = this;
+        _self.createList();
+      }
+
+    });
+
+  </script>
+
+
+
+</dom-module>
