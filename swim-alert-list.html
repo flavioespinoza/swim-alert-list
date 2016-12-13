@@ -50,6 +50,10 @@ Animated list for actionable alerts.
       //TODO: Figure this out
       xAxis: false,
 
+      listData: function () {
+        return [102.07004181764418, 107.77473133904395, 105.67220015430932, 94.04339793649791, 87.51210094429422, 82.62377196302312, 111.40493534823528, 107.77867201007192, 87.95548123841822, 97.1291172121729, 89.50700548778882, 107.7170950389358, 85.6985427954139, 93.41886392978734, 106.7009926985093, 118.13773400476786, 99.01162000169556, 99.69115404768428, 89.17407466337484, 103.2567668176822, 96.72428516368193, 84.31759475745694, 88.40362155763371, 93.32005760258824]
+      },
+
       createList: function () {
         const _self = this;
 
@@ -57,9 +61,11 @@ Animated list for actionable alerts.
           width = 560 - margin.left - margin.right,
           height = 500 - margin.top - margin.bottom;
 
-        _self.index = d3.range(24);
+        _self.data = _self.listData();
 
-        _self.data = _self.index.map(d3.random.normal(100, 10));
+        console.log('_self.data', JSON.stringify(_self.data));
+
+        _self.index = d3.range(_self.data.length);
 
         _self.x = d3.scale.linear()
           .domain([0, d3.max(_self.data)])
